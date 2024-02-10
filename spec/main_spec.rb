@@ -82,6 +82,10 @@ describe Main do
       it 'correctly organizes the animals R, R, R, R, R, R' do
         expect_animals_to_be_in_boxes('R, R, R, R, R, R', ['B2', 'B3'])
       end
+
+      it 'correctly organizes the animals S, M, M, M, H' do
+        expect_animals_to_be_in_boxes('S, M, M, M, H', ['B2', 'B3', 'B3'])
+      end
     end
   end
 
@@ -180,8 +184,8 @@ describe Main do
     end
   end
 
-  describe "#merge_b1_boxes" do
-    it "merges the b1 boxes" do
+  describe "#merge_boxes_from_to" do
+    it "merges the boxes into the next level" do
       instance = Main.new
       instance.instance_variable_set(:@boxes, {
         B1: [Boxes::B1.new, Boxes::B1.new],
@@ -189,7 +193,7 @@ describe Main do
         B3: []
       })
 
-      instance.send(:merge_b1_boxes)
+      instance.send(:merge_boxes_from_to, :B1, :B2)
 
       expect(
         instance.instance_variable_get(:@boxes).map { |key, value| value.map(&:name) }
@@ -198,7 +202,7 @@ describe Main do
       )
     end
 
-    it 'does not touch the b1 boxes if there is only one' do
+    it 'does not touch the remaining origin boxes' do
       instance = Main.new
       instance.instance_variable_set(:@boxes, {
         B1: [Boxes::B1.new],
@@ -206,48 +210,12 @@ describe Main do
         B3: []
       })
 
-      instance.send(:merge_b1_boxes)
+      instance.send(:merge_boxes_from_to, :B1, :B2)
 
       expect(
         instance.instance_variable_get(:@boxes).map { |key, value| value.map(&:name) }
       ).to eq(
         [['B1'], ['B2'], []]
-      )
-    end
-  end
-
-  describe '#merge_b2_boxes' do
-    it 'merges the b2 boxes' do
-      instance = Main.new
-      instance.instance_variable_set(:@boxes, {
-        B1: [],
-        B2: [Boxes::B2.new, Boxes::B2.new],
-        B3: []
-      })
-
-      instance.send(:merge_b2_boxes)
-
-      expect(
-        instance.instance_variable_get(:@boxes).map { |key, value| value.map(&:name) }
-      ).to eq(
-        [[], [], ['B3']]
-      )
-    end
-
-    it 'does not touch the b2 boxes if there is only one' do
-      instance = Main.new
-      instance.instance_variable_set(:@boxes, {
-        B1: [],
-        B2: [Boxes::B2.new],
-        B3: []
-      })
-
-      instance.send(:merge_b2_boxes)
-
-      expect(
-        instance.instance_variable_get(:@boxes).map { |key, value| value.map(&:name) }
-      ).to eq(
-        [[], ['B2'], []]
       )
     end
   end
@@ -274,14 +242,13 @@ describe Main do
   describe '#merge_boxes' do
     it 'calls the merge methods' do
       instance = Main.new
-      allow(instance).to receive(:merge_b1_boxes)
-      allow(instance).to receive(:merge_b2_boxes)
+      allow(instance).to receive(:merge_boxes_from_to).twice
       allow(instance).to receive(:merge_b1_and_b2_boxes)
 
       instance.send(:merge_boxes)
 
-      expect(instance).to have_received(:merge_b1_boxes)
-      expect(instance).to have_received(:merge_b2_boxes)
+      expect(instance).to have_received(:merge_boxes_from_to).with(:B1, :B2)
+      expect(instance).to have_received(:merge_boxes_from_to).with(:B2, :B3)
       expect(instance).to have_received(:merge_b1_and_b2_boxes)
     end
   end

@@ -81,25 +81,14 @@ class Main
     end
   end
 
-  def merge_b1_boxes
-    b1_count = @boxes[:B1].size
-    mergeable = (b1_count / 2).floor
+  def merge_boxes_from_to(box_type, next_box_type)
+    box_count = @boxes[box_type].size
+    mergeable = (box_count / 2).floor
 
-    @boxes[:B1].pop(mergeable * 2)
-
-    mergeable.times do
-      @boxes[:B2] << Boxes::B2.new
-    end
-  end
-
-  def merge_b2_boxes
-    b2_count = @boxes[:B2].size
-    mergeable = (b2_count / 2).floor
-
-    @boxes[:B2].pop(mergeable * 2)
+    @boxes[box_type].pop(mergeable * 2)
 
     mergeable.times do
-      @boxes[:B3] << Boxes::B3.new
+      @boxes[next_box_type] << Object.const_get("Boxes::#{next_box_type}").new
     end
   end
 
@@ -112,8 +101,8 @@ class Main
   end
 
   def merge_boxes
-    merge_b1_boxes
-    merge_b2_boxes
+    merge_boxes_from_to(:B1, :B2)
+    merge_boxes_from_to(:B2, :B3)
     merge_b1_and_b2_boxes
   end
 end
