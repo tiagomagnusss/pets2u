@@ -42,5 +42,5 @@ Input your data and press `Enter` to see the output.
 To run the tests, you need to have Ruby installed in your machine. Then, you can run the following command in the root directory of the project:
 
 ```bash
-ruby test.rb
+rspec ./spec/
 ```
